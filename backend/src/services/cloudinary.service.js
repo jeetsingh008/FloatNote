@@ -1,5 +1,5 @@
 import { v2 as cloudinary } from "cloudinary";
-import fs from "fs";
+import fs from "fs/promises"; // <-- Import the promises version
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -10,13 +10,22 @@ cloudinary.config({
 export const uploadOnCloudinary = async (localFilePath) => {
   try {
     if (!localFilePath) return null;
-    // upload the file on cloudinary
+
     const response = await cloudinary.uploader.upload(localFilePath, {
       resource_type: "auto",
     });
+
     console.log("File successfully uploaded on cloudinary: ", response.url);
+    await fs.unlink(localFilePath);
     return response;
   } catch (error) {
-    fs.unlinkSync(localFilePath);
+    console.error("Cloudinary upload failed:", error);
+
+    try {
+      await fs.unlink(localFilePath);
+    } catch (unlinkError) {
+      console.error("Failed to delete local file after error:", unlinkError);
+    }
+    return null;
   }
 };
