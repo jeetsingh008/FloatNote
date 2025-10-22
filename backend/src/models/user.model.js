@@ -29,7 +29,11 @@ const userSchema = new mongoose.Schema(
     },
     avatar: {
       type: String,
-      required: true,
+      required: [true, "Avatar is required"],
+    },
+    coverImage: {
+      type: String,
+      required: false,
     },
     notes: [
       {
